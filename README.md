@@ -15,7 +15,7 @@ API сервис для управления доставкой посылок �
 
 - FastAPI
 - SQLAlchemy
-- PostgreSQL
+- MySQL
 - Redis
 - Celery
 - Pytest
@@ -23,51 +23,27 @@ API сервис для управления доставкой посылок �
 ## Установка
 
 1. Клонируйте репозиторий
-2. Создайте виртуальное окружение:
-```bash
-python -m venv venv
-source venv/bin/activate  # для Linux/Mac
-venv\Scripts\activate  # для Windows
+2. Создайте файл `.env` с настройками:
 ```
-
-3. Установите зависимости:
-```bash
-pip install -r requirements.txt
-```
-
-4. Создайте файл `.env` с настройками:
-```
-DATABASE_URL=postgresql://user:password@localhost:5432/delivery_db
-REDIS_URL=redis://localhost:6379/0
+DATABASE_URL=mysql+asyncmy://user:password@db:3306/delivery_db
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_DB=0
 CBR_API_URL=https://www.cbr-xml-daily.ru/daily_json.js
 ```
 
 ## Запуск
 
-1. Запустите базу данных и Redis:
+Запустите все сервисы и приложение одной командой:
 ```bash
-docker-compose up -d
+docker-compose up --build -d
 ```
-
-2. Запустите приложение:
-```bash
-uvicorn app.composites.http_api:app --reload
-```
-
-3. Запустите Celery worker:
-```bash
-celery -A app.tasks.celery_app worker --loglevel=info
-```
-
-4. Запустите Celery beat:
-```bash
-celery -A app.tasks.celery_app beat --loglevel=info
-```
+При старте стека автоматически выполняются миграции.
 
 ## Тестирование
 
 ```bash
-pytest
+docker-compose exec app pytest
 ```
 
 ## API Документация
