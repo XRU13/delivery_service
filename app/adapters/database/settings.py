@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from pydantic.v1 import BaseSettings
+from pydantic_settings import BaseSettings
 
 load_dotenv()
 
@@ -8,8 +8,9 @@ class MySQLSettings(BaseSettings):
 	# База данных
 	DATABASE_URL: str = 'mysql+aiomysql://user:password@localhost:3306/delivery_db'
 
-	class Config:
-		env_file = '.env'
+	model_config = {
+		'env_file': '.env'
+	}
 
 
 class CelerySettings(BaseSettings):
@@ -18,5 +19,6 @@ class CelerySettings(BaseSettings):
 	CELERY_RESULT_BACKEND: str = 'redis://localhost:6379/2'
 	DATABASE_URL: str = 'mysql+aiomysql://user:password@localhost:3306/delivery_db'
 
-	class Config:
-		env_file = '.env'
+	model_config = {
+		'env_file': '.env'
+	}

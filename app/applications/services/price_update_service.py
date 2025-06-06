@@ -1,5 +1,4 @@
 import datetime
-from typing import List
 
 from app.applications.dataclasses.dataclasses import Parcel
 from app.adapters.database.repositories import ParcelRepo
@@ -17,7 +16,7 @@ class PriceUpdateService:
 
 	async def update_all(self) -> None:
 		rate = await self._rate_service.get_usd_rub_rate()
-		parcels: List[Parcel] = await self._parcel_repo.get_unpriced_parcels()
+		parcels: list[Parcel] = await self._parcel_repo.get_unpriced_parcels()
 
 		for parcel in parcels:
 			parcel.delivery_price = (

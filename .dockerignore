@@ -1,0 +1,34 @@
+# Ignore Git repository
+.git
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+
+# Logs
+*.log
+
+# Virtual environments
+venv/
+.env
+.venv
+env/
+ENV/
+
+# IDE directories
+.idea/
+.vscode/
+
+# Ignore everything else
+**
+
+# Allow required application files
+!app/
+!app/**
+!alembic/
+!alembic/**
+!requirements.txt
+!Dockerfile
+!docker-compose.yml
+!README.md
+!alembic.ini

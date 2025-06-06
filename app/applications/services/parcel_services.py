@@ -1,6 +1,4 @@
-from typing import Optional, List
-
-from attr import frozen
+from dataclasses import dataclass
 
 from app.adapters.http_api.schemas.schemas import (
 	ParcelTypeResponse,
@@ -9,10 +7,10 @@ from app.adapters.http_api.schemas.schemas import (
 )
 from app.applications.interfaces.interfaces import IParcelRepositories
 from app.applications.services.errors.errors import NotFoundError
-from app.utils.constants import ServiceConstants
+from app.utils.constants import ParcelsConstants
 
 
-@frozen
+@dataclass(frozen=True)
 class ParcelService:
 	parcel_repo: IParcelRepositories
 
@@ -44,7 +42,7 @@ class ParcelService:
 		)
 		return parcel
 
-	async def get_all_types(self) -> List[ParcelTypeResponse]:
+	async def get_all_types(self) -> list[ParcelTypeResponse]:
 		"""
 		Получаем все типы посылок
 		"""
@@ -59,11 +57,11 @@ class ParcelService:
 	async def list_parcels(
 		self,
 		session_id: str,
-		type_id: Optional[int],
-		has_delivery_cost: Optional[bool],
+		type_id: int | None,
+		has_delivery_cost: bool | None,
 		limit: int,
 		offset: int,
-	) -> List[ParcelListResponse]:
+	) -> list[ParcelListResponse]:
 		"""
 		Получаем список посылок
 		"""
@@ -87,7 +85,7 @@ class ParcelService:
 					delivery_price=(
 						parcel.delivery_price
 						if parcel.delivery_price is not None
-						else ServiceConstants.NOT_MEANT
+						else ParcelsConstants.NOT_MEANT
 					),
 					created_at=parcel.created_at,
 				)
@@ -120,7 +118,7 @@ class ParcelService:
 			delivery_price=(
 				parcel.delivery_price
 				if parcel.delivery_price is not None
-				else ServiceConstants.NOT_MEANT
+				else ParcelsConstants.NOT_MEANT
 			),
 			created_at=parcel.created_at,
 		)

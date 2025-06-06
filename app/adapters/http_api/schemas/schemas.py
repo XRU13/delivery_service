@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
-from typing import Optional, Union, Literal
+from typing import Literal
 
 
 class ParcelTypeBase(BaseModel):
@@ -10,8 +10,9 @@ class ParcelTypeBase(BaseModel):
 class ParcelType(ParcelTypeBase):
 	id: int
 
-	class Config:
-		from_attributes = True
+	model_config = {
+		'from_attributes': True,
+	}
 
 
 class ParcelBaseSchema(BaseModel):
@@ -41,7 +42,7 @@ class ParcelListResponse(BaseModel):
 	type_id: int
 	type_name: str
 	content_value_usd: float
-	delivery_price: Union[str, float]
+	delivery_price: str | float
 	created_at: datetime
 
 
@@ -52,5 +53,5 @@ class ParcelDetailResponse(BaseModel):
 	type_id: int
 	type_name: str
 	content_value_usd: float
-	delivery_price: Optional[float] | Literal["Не рассчитано"]
+	delivery_price: float | Literal['Не рассчитано'] | None
 	created_at: datetime

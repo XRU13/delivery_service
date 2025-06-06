@@ -1,9 +1,8 @@
-import attr
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
 
 
-@attr.dataclass
+@dataclass
 class Parcel:
 	session_id: str
 	name: str
@@ -12,11 +11,11 @@ class Parcel:
 	content_value_usd: float
 	created_at: datetime
 	updated_at: datetime
-	delivery_price: Optional[float] = None
-	id: Optional[int] = None
+	delivery_price: float | None = None
+	id: int | None = None
 
 
-@attr.dataclass
+@dataclass
 class ParcelType:
 	name: str
-	id: Optional[int] = None
+	id: int | None = None

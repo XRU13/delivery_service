@@ -1,7 +1,9 @@
+from uuid import uuid4
+
 from redis.asyncio import Redis
 from typing import AsyncGenerator
 
-from fastapi import Depends
+from fastapi import Depends, Response, Cookie
 
 from sqlalchemy.ext.asyncio import (
 	create_async_engine,
@@ -12,6 +14,7 @@ from sqlalchemy.ext.asyncio import (
 from app.adapters import database
 from app.adapters.database.repositories import ParcelRepo
 from app.applications.services.parcel_services import ParcelService
+from app.utils.constants import CookiesConstants
 from app.utils.settings import RateSettings
 
 
@@ -78,3 +81,21 @@ def create_parcel_service(
 	parcel_repo: ParcelRepo = Depends(create_parcel_repo),
 ) -> ParcelService:
 	return ParcelService(parcel_repo=parcel_repo)
+
+
+async def get_or_create_session_id(
+	response: Response,
+	session_id: str | None = Cookie(
+		default=None,
+		alias=CookiesConstants.SESSION_ID.value,
+	),
+) -> str:
+	if session_id is None:
+		session_id = uuid4().hex
+		response.set_cookie(
+			key=CookiesConstants.SESSION_ID.value,
+			value=session_id,
+			httponly=True,
+			max_age=CookiesConstants.MAX_AGE.value,
+		)
+	return session_id

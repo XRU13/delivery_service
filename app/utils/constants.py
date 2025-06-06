@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class ParcelsConstants(Enum, str):
+class ParcelsConstants(str, Enum):
 	NOT_MEANT = 'Не рассчитано'
 
 

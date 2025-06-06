@@ -20,7 +20,6 @@ apscheduler==3.10.4
 requests==2.31.0 
 aioredis~=2.0.1
 starlette~=0.27.0
-attrs~=25.3.0
 redis==5.0.1
 asyncmy>=0.2.10
 aiomysql>=0.0.21

@@ -13,19 +13,19 @@ class RateService:
         self._ttl = ttl_seconds
 
     async def get_usd_rub_rate(self) -> float:
-        # 1. Сначала пробуем взять значение из Redis-кеша
-        cached = await self._redis.get("USD_RUB")
+        # Сначала пробуем взять значение из Redis-кеша
+        cached = await self._redis.get('USD_RUB')
         if cached is not None:
             return float(cached)
 
-        # 2. Если в кеше нет, делаем HTTP-запрос к API ЦБ
+        # Если в кеше нет, делаем HTTP-запрос к API ЦБ
         async with httpx.AsyncClient() as client:
             resp = await client.get(self._cbr_url, timeout=5.0)
             resp.raise_for_status()
             data = resp.json()
 
-        rate = float(data["Valute"]["USD"]["Value"])
+        rate = float(data['Valute']['USD']['Value'])
 
-        # 3. Кладём в кеш с истечением ttl_seconds
-        await self._redis.set("USD_RUB", rate, ex=self._ttl)
+        # Кладём в кеш с истечением ttl_seconds
+        await self._redis.set('USD_RUB', rate, ex=self._ttl)
         return rate

@@ -18,7 +18,7 @@ app.include_router(tasks_router, prefix='/tasks', tags=['tasks'])
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'], # заменить на нужные
+    allow_origins=['*'],
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*'],

@@ -9,12 +9,12 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:
-      - "3306:3306"
+      - '3306:3306'
     volumes:
       - mysql_data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
       interval: 5s
       timeout: 5s
       retries: 5
@@ -23,31 +23,40 @@ services:
   redis:
     image: redis:6.2
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
 
   app:
     build: .
+    image: delivery_app
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_started
     ports:
-      - "8000:8000"
+      - '8000:8000'
     environment:
       DATABASE_URL: mysql+asyncmy://user:password@db:3306/delivery_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_DB: 0
       CBR_API_URL: https://www.cbr-xml-daily.ru/daily_json.js
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_HOST: db
     command: >
-      sh -c "alembic upgrade head &&
-             uvicorn app.composites.http_api:app --host 0.0.0.0 --port 8000 --reload"
+      sh -c "
+        until mysqladmin ping -h db -uuser -ppassword --silent; do
+          echo 'Waiting for MySQL...'; sleep 2;
+        done &&
+        alembic upgrade head &&
+        uvicorn app.composites.http_api:app --host 0.0.0.0 --port 8000 --reload
+      "
 
   celery_worker:
-    build: .
+    image: delivery_app
     depends_on:
       db:
         condition: service_healthy
@@ -61,14 +70,20 @@ services:
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
       CBR_API_URL: https://www.cbr-xml-daily.ru/daily_json.js
-      CELERY_CUSTOM_WORKER_POOL: "celery_aio_pool.pool:AsyncIOPool"
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_HOST: db
+      CELERY_CUSTOM_WORKER_POOL: 'celery_aio_pool.pool:AsyncIOPool'
     command: >
-      celery -A app.tasks.celery_app worker
-      --concurrency=1
-      --loglevel=info
+      sh -c "
+        until mysqladmin ping -h db -uuser -ppassword --silent; do
+          echo 'Waiting for MySQL...'; sleep 2;
+        done &&
+        celery -A app.tasks.celery_app worker --concurrency=1 --loglevel=info
+      "
 
   celery_beat:
-    build: .
+    image: delivery_app
     depends_on:
       db:
         condition: service_healthy
@@ -82,12 +97,18 @@ services:
       CELERY_BROKER_URL: redis://redis:6379/0
       CELERY_RESULT_BACKEND: redis://redis:6379/0
       CBR_API_URL: https://www.cbr-xml-daily.ru/daily_json.js
-      CELERY_CUSTOM_WORKER_POOL: "celery_aio_pool.pool:AsyncIOPool"
+      DB_USER: user
+      DB_PASSWORD: password
+      DB_HOST: db
+      CELERY_CUSTOM_WORKER_POOL: 'celery_aio_pool.pool:AsyncIOPool'
     command: >
-      celery -A app.tasks.celery_app beat
-      --loglevel=info
+      sh -c "
+        until mysqladmin ping -h db -uuser -ppassword --silent; do
+          echo 'Waiting for MySQL...'; sleep 2;
+        done &&
+        celery -A app.tasks.celery_app beat --loglevel=info
+      "
 
 volumes:
   mysql_data:
   redis_data:
-  celerybeat-data:

@@ -1,5 +1,4 @@
 import datetime
-from typing import Optional, List
 
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -20,7 +19,7 @@ class ParcelRepo(IParcelRepositories):
         type_id: int,
         content_value_usd: float,
         session_id: str,
-        delivery_price: Optional[float] = None,
+        delivery_price: float | None = None,
     ) -> int:
         """
         Создает посылку
@@ -42,7 +41,7 @@ class ParcelRepo(IParcelRepositories):
         self,
         name: str,
         session_id: str,
-    ) -> Optional[Parcel]:
+    ) -> Parcel | None:
         """
         Возвращает посылку по имени и session_id, или None, если не найдена.
         """
@@ -54,7 +53,7 @@ class ParcelRepo(IParcelRepositories):
         result = await self.session.execute(stmt)
         return result.scalars().first()
 
-    async def get_all_types(self) -> List[ParcelType]:
+    async def get_all_types(self) -> list[ParcelType]:
         """
         Возвращает все типы посылок.
         """
@@ -65,11 +64,11 @@ class ParcelRepo(IParcelRepositories):
     async def list_by_filters(
         self,
         session_id: str,
-        type_id: Optional[int],
-        has_delivery_cost: Optional[bool],
+        type_id: int | None,
+        has_delivery_cost: bool | None,
         limit: int,
         offset: int,
-    ) -> List[Parcel]:
+    ) -> list[Parcel]:
         """
         Возвращает отфильтрованный список посылок.
         """
@@ -97,7 +96,7 @@ class ParcelRepo(IParcelRepositories):
         self,
         parcel_id: int,
         session_id: str,
-    ) -> Optional[Parcel]:
+    ) -> Parcel | None:
         """
         Возвращает один объект Parcel по его id и session_id,
         или None, если не найден.
@@ -113,7 +112,7 @@ class ParcelRepo(IParcelRepositories):
         result = await self.session.execute(stmt)
         return result.scalars().first()
 
-    async def get_unpriced_parcels(self) -> List[Parcel]:
+    async def get_unpriced_parcels(self) -> list[Parcel]:
         """
         Возвращает все посылки без стоимости.
         """

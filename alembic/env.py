@@ -2,9 +2,9 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config, pool
 from alembic import context
+from app.adapters.database.settings import MySQLSettings
 
 from app.adapters.database.tables import metadata
-from app.config import settings
 
 # Alembic Config object
 config = context.config
@@ -15,6 +15,8 @@ if config.config_file_name is not None:
 
 target_metadata = metadata
 
+settings = MySQLSettings()
+
 def get_url() -> str:
     """
     Берёт DATABASE_URL из настроек и, если в нём указана асинхронная часть,
@@ -22,9 +24,9 @@ def get_url() -> str:
     """
     url: str = settings.DATABASE_URL
     # убираем async-драйвер
-    for async_scheme in ("+asyncmy", "+aiomysql", "+asyncmy"):
+    for async_scheme in ('+asyncmy', '+aiomysql', '+asyncmy'):
         if async_scheme in url:
-            url = url.replace(async_scheme, "")
+            url = url.replace(async_scheme, '')
     return url
 
 def run_migrations_offline() -> None:
@@ -33,7 +35,7 @@ def run_migrations_offline() -> None:
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
+        dialect_opts={'paramstyle': 'named'},
     )
 
     with context.begin_transaction():
@@ -43,10 +45,10 @@ def run_migrations_offline() -> None:
 def run_migrations_online() -> None:
     # Собираем синхронный движок из конфига
     configuration = config.get_section(config.config_ini_section)
-    configuration["sqlalchemy.url"] = get_url()
+    configuration['sqlalchemy.url'] = get_url()
     connectable = engine_from_config(
         configuration,
-        prefix="sqlalchemy.",
+        prefix='sqlalchemy.',
         poolclass=pool.NullPool,
     )
 

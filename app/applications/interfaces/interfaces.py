@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Optional, List
 
 from app.applications.dataclasses.dataclasses import Parcel, ParcelType
 
@@ -14,7 +13,7 @@ class IParcelRepositories(ABC):
 		type_id: int,
 		content_value_usd: float,
 		session_id: str,
-		delivery_price: Optional[float] = None,
+		delivery_price: float | None = None,
 	) -> int:
 		pass
 
@@ -23,22 +22,22 @@ class IParcelRepositories(ABC):
 		self,
 		name: str,
 		session_id: str,
-	) -> Optional[Parcel]:
+	) -> Parcel | None:
 		pass
 
 	@abstractmethod
-	async def get_all_types(self) -> List[ParcelType]:
+	async def get_all_types(self) -> list[ParcelType]:
 		pass
 
 	@abstractmethod
 	async def list_by_filters(
 		self,
 		session_id: str,
-		type_id: Optional[int],
-		has_delivery_cost: Optional[bool],
+		type_id: int | None,
+		has_delivery_cost: bool | None,
 		limit: int,
 		offset: int,
-	) -> List[Parcel]:
+	) -> list[Parcel]:
 		pass
 
 	@abstractmethod
@@ -46,10 +45,9 @@ class IParcelRepositories(ABC):
 		self,
 		parcel_id: int,
 		session_id: str,
-	) -> Optional[Parcel]:
+	) -> Parcel | None:
 		pass
 
 	@abstractmethod
-	async def get_unpriced_parcels(self) -> List[Parcel]:
+	async def get_unpriced_parcels(self) -> list[Parcel]:
 		pass
-
