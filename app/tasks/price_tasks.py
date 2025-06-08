@@ -12,11 +12,26 @@ logger = logging.getLogger(__name__)
 
 @celery_app.task(name='app.tasks.price_tasks.update_delivery_prices')
 def update_delivery_prices():
+    """
+    Точка входа для задачи Celery.
+    Запускает асинхронную функцию обновления стоимости доставки.
+    """
     logger.info('Running update_delivery_prices task...')
-    asyncio.run(_update_delivery_prices_async())
+    try:
+        asyncio.run(_update_delivery_prices_async())
+        logger.info('Celery: задача update_delivery_prices успешно завершена')
+    except Exception as e:
+        logger.exception(f'Ошибка в задаче update_delivery_prices: {e}')
 
 
 async def _update_delivery_prices_async():
+    """
+    Асинхронное обновление стоимости доставки для посылок без цены.
+    Включает:
+    - подключение к Redis
+    - получение курса USD/RUB
+    - перебор всех сессий базы Celery и обновление цен
+    """
     redis = get_celery_redis()
     rate_svc = RateService(
         redis,

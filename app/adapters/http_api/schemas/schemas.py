@@ -4,10 +4,13 @@ from typing import Literal
 
 
 class ParcelTypeBase(BaseModel):
-	name: str = Field(..., min_length=1, max_length=50)
+	"""Базовая модель для типа посылки."""
+	name: str = Field(..., min_length=1, max_length=50,
+	                  description='Название типа посылки')
 
 
 class ParcelType(ParcelTypeBase):
+	"""Тип посылки с ID (используется при работе с БД)."""
 	id: int
 
 	model_config = {
@@ -16,60 +19,78 @@ class ParcelType(ParcelTypeBase):
 
 
 class ParcelBaseSchema(BaseModel):
-	name: str = Field(..., min_length=1, max_length=100)
-	weight: float = Field(..., gt=0)
-	type_id: int = Field(..., gt=0)
-	content_value_usd: float = Field(..., gt=0)
+	"""Базовая модель данных посылки."""
+	name: str = Field(..., min_length=1, max_length=100,
+	                  description='Название посылки')
+	weight: float = Field(..., gt=0, description='Вес посылки в кг')
+	type_id: int = Field(..., gt=0, description='ID типа посылки')
+	content_value_usd: float = Field(..., gt=0,
+	                                 description='Стоимость содержимого в USD')
 
 
 class ParcelCreateSchema(ParcelBaseSchema):
+	"""Схема для создания новой посылки."""
 	pass
 
 
 class ParcelResponse(BaseModel):
-	parcel_id: int
+	"""Ответ после создания посылки."""
+	parcel_id: int = Field(..., description='ID созданной посылки')
 
 
 class ParcelTypeResponse(BaseModel):
-	type_id: int
-	name: str
+	"""Схема для отображения типа посылки."""
+	type_id: int = Field(..., description='ID типа посылки')
+	name: str = Field(..., description='Название типа')
 
 
 class ParcelListResponse(BaseModel):
-	parcel_id: int
-	name: str
-	weight: float
-	type_id: int
-	type_name: str
-	content_value_usd: float
-	delivery_price: str | float
-	created_at: datetime
+	"""Схема ответа при получении списка посылок."""
+	parcel_id: int = Field(..., description='ID посылки')
+	name: str = Field(..., description='Название посылки')
+	weight: float = Field(..., description='Вес посылки в кг')
+	type_id: int = Field(..., description='ID типа посылки')
+	type_name: str = Field(..., description='Название типа посылки')
+	content_value_usd: float = Field(...,
+	                                 description='Стоимость содержимого в USD')
+	delivery_price: str | float = Field(...,
+	                                    description="Цена доставки или 'Не рассчитано'")
+	created_at: datetime = Field(..., description='Дата и время создания')
 
 
 class ParcelDetailResponse(BaseModel):
-	parcel_id: int
-	name: str
-	weight: float
-	type_id: int
-	type_name: str
-	content_value_usd: float
-	delivery_price: float | Literal['Не рассчитано'] | None
-	created_at: datetime
+	"""Схема ответа при получении информации о посылке по ID."""
+	parcel_id: int = Field(..., description='ID посылки')
+	name: str = Field(..., description='Название посылки')
+	weight: float = Field(..., description='Вес посылки в кг')
+	type_id: int = Field(..., description='ID типа посылки')
+	type_name: str = Field(..., description='Название типа посылки')
+	content_value_usd: float = Field(...,
+	                                 description='Стоимость содержимого в USD')
+	delivery_price: float | Literal['Не рассчитано'] | None = Field(
+		..., description="Стоимость доставки или 'Не рассчитано'"
+	)
+	created_at: datetime = Field(..., description='Дата создания')
 
 
 class CompanyCreateSchema(BaseModel):
-	name: str
+	"""Схема для создания новой транспортной компании."""
+	name: str = Field(..., description='Название компании')
 
 
 class CompanyResponse(CompanyCreateSchema):
-	id: int
-	name: str
+	"""Схема ответа при получении данных о компании."""
+	id: int = Field(..., description='ID компании')
+	name: str = Field(..., description='Название компании')
 
 
 class BindCompanySchema(BaseModel):
+	"""Запрос на привязку посылки к компании."""
 	parcel_id: int = Field(..., ge=1, description='ID посылки')
 	company_id: int = Field(..., ge=1, description='ID компании')
 
 
 class BindCompanyResponseSchema(BaseModel):
-	message: str = 'Компания успешно привязана к посылке'
+	"""Ответ на успешную привязку посылки к компании."""
+	message: str = Field(default='Компания успешно привязана к посылке',
+	                     description='Сообщение об успехе')

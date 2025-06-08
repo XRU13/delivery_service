@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 
 from fastapi import HTTPException
@@ -8,13 +9,20 @@ from app.adapters.http_api.schemas.schemas import (
 	ParcelListResponse,
 	ParcelDetailResponse, BindCompanyResponseSchema,
 )
-from app.applications.interfaces.interfaces import IParcelRepositories
+from app.applications.interfaces.parcel_interfaces import IParcelRepositories
 from app.applications.services.errors.errors import NotFoundError
 from app.utils.constants import ParcelsConstants
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
 class ParcelService:
+	"""
+	Сервис для управления посылками: создание, получение, фильтрация,
+	привязка к транспортным компаниям и отображение информации.
+	"""
+
 	parcel_repo: IParcelRepositories
 
 	async def create_parcel(
@@ -26,16 +34,27 @@ class ParcelService:
 		session_id: str,
 	) -> int:
 		"""
-		Создаёт новую посылку и возвращает её ID.
-		Проверяет существование в рамках одной сессии через репозиторий.
+		Создать новую посылку или вернуть ID существующей,
+		если посылка с таким именем уже существует в рамках текущей сессии.
+
+		:param name: Название посылки
+		:param weight: Вес посылки в кг
+		:param type_id: Идентификатор типа посылки
+		:param content_value_usd: Стоимость содержимого в долларах
+		:param session_id: Идентификатор пользовательской сессии
+		:return: ID посылки
 		"""
+		# Проверяем, существует ли уже посылка с таким именем
+		# в рамках сессии пользователя
 		existing = await self.parcel_repo.get_by_name_and_session(
 			name=name,
 			session_id=session_id,
 		)
 		if existing:
+			logger.info(f'Посылка уже существует: id={existing.id}')
 			return existing.id
 
+		# Если не существует — создаём новую посылку
 		parcel = await self.parcel_repo.create_parcel(
 			name=name,
 			weight=weight,
@@ -47,7 +66,9 @@ class ParcelService:
 
 	async def get_all_types(self) -> list[ParcelTypeResponse]:
 		"""
-		Получаем все типы посылок
+		Получить все доступные типы посылок.
+
+		:return: Список объектов ParcelTypeResponse
 		"""
 		parcel_types = await self.parcel_repo.get_all_types()
 		return [
@@ -66,8 +87,17 @@ class ParcelService:
 		offset: int,
 	) -> list[ParcelListResponse]:
 		"""
-		Получаем список посылок
+		Получить список посылок текущей сессии с возможностью фильтрации
+		и пагинации.
+
+		:param session_id: Идентификатор сессии
+		:param type_id: Тип посылки (опционально)
+		:param has_delivery_cost: Только с/без стоимости доставки (опционально)
+		:param limit: Ограничение на количество элементов
+		:param offset: Смещение для пагинации
+		:return: Список ParcelListResponse
 		"""
+		# Получаем посылки из репозитория с применением фильтров
 		parcels = await self.parcel_repo.list_by_filters(
 			session_id=session_id,
 			type_id=type_id,
@@ -101,14 +131,24 @@ class ParcelService:
 		session_id: str,
 	) -> ParcelDetailResponse:
 		"""
-		Возвращает детальную информацию по одной посылке,
-		либо кидает NotFoundError, если нет.
+		Получить детальную информацию о посылке по ID и session_id.
+
+		Если не найдена — возбуждается исключение NotFoundError.
+
+		:param parcel_id: ID посылки
+		:param session_id: Идентификатор сессии
+		:return: Объект ParcelDetailResponse
 		"""
+		# Пытаемся найти посылку по ID и session_id
 		parcel = await self.parcel_repo.get_by_id_and_session(
 			parcel_id=parcel_id,
 			session_id=session_id,
 		)
+
+		# Если не нашли — логируем и выбрасываем исключение
 		if parcel is None:
+			logger.warning(
+				f'Посылка не найдена: id={parcel_id}, session_id={session_id}')
 			raise NotFoundError(parcel_id=parcel_id)
 
 		return ParcelDetailResponse(
@@ -132,13 +172,24 @@ class ParcelService:
 		company_id: int,
 	) -> BindCompanyResponseSchema:
 		"""
-        Привязывает посылку к транспортной компании, если она ещё не привязана.
-        """
+		Привязать посылку к компании, если она ещё не привязана.
+
+		Если привязка уже существует — возбуждается HTTP 409.
+
+		:param parcel_id: ID посылки
+		:param company_id: ID транспортной компании
+		:return: Подтверждение в виде BindCompanyResponseSchema
+		"""
+
+		# Пытаемся выполнить привязку.
+		# Репозиторий вернёт None, если посылка уже привязана.
 		parcel = await self.parcel_repo.bind_company_to_parcel(
-				parcel_id=parcel_id,
-				company_id=company_id,
-			)
+			parcel_id=parcel_id,
+			company_id=company_id,
+		)
+		# Если привязка не выполнена — значит уже была, возвращаем 409
 		if not parcel:
+			logger.warning(f'Посылка уже привязана: parcel_id={parcel_id}')
 			raise HTTPException(
 				status_code=status.HTTP_409_CONFLICT,
 				detail='Посылка уже привязана к компании',

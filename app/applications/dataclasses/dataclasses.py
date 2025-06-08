@@ -4,6 +4,11 @@ from datetime import datetime
 
 @dataclass
 class Parcel:
+	"""
+	Доменная модель посылки.
+
+	Используется в бизнес-логике и задачах, абстрагируясь от ORM-модели.
+	"""
 	session_id: str
 	name: str
 	weight: float
@@ -18,11 +23,17 @@ class Parcel:
 
 @dataclass
 class ParcelType:
+	"""
+	Доменная модель типа посылки.
+	"""
 	name: str
 	id: int | None = None
 
 
 @dataclass
 class Company:
+	"""
+	Доменная модель транспортной компании.
+	"""
 	name: str
 	id: int | None = None
