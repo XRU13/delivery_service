@@ -51,3 +51,11 @@ class IParcelRepositories(ABC):
 	@abstractmethod
 	async def get_unpriced_parcels(self) -> list[Parcel]:
 		pass
+
+	@abstractmethod
+	async def bind_company_to_parcel(
+		self,
+		parcel_id: int,
+		company_id: int,
+	) -> bool:
+		pass

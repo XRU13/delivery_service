@@ -1,7 +1,7 @@
 import datetime
 
+from app.adapters.database.repositories.parcel_repo import ParcelRepo
 from app.applications.dataclasses.dataclasses import Parcel
-from app.adapters.database.repositories import ParcelRepo
 from app.utils.rate import RateService
 
 

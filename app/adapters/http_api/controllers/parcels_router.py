@@ -5,7 +5,7 @@ from app.adapters.http_api.schemas.schemas import (
 	ParcelResponse,
 	ParcelTypeResponse,
 	ParcelListResponse,
-	ParcelDetailResponse,
+	ParcelDetailResponse, BindCompanyResponseSchema, BindCompanySchema,
 )
 from app.adapters.http_api.settings import (
 	create_parcel_service,
@@ -99,4 +99,24 @@ async def get_parcel(
 	return await parcel_service.get_parcel(
 		parcel_id=parcel_id,
 		session_id=session_id,
+	)
+
+
+@parcel_router.post(
+	'/bind_company',
+	response_model=BindCompanyResponseSchema,
+	status_code=status.HTTP_200_OK,
+)
+async def bind_parcel_to_company(
+	response: Response,
+	company_data: BindCompanySchema,
+	parcel_service: ParcelService = Depends(create_parcel_service),
+) -> BindCompanyResponseSchema:
+	"""
+    Привязать посылку к компании в рамках сессии пользователя.
+    Только если она ещё не привязана.
+    """
+	return await parcel_service.bind_company_to_parcel(
+		parcel_id=company_data.parcel_id,
+		company_id=company_data.company_id,
 	)

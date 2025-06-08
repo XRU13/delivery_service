@@ -55,3 +55,21 @@ class ParcelDetailResponse(BaseModel):
 	content_value_usd: float
 	delivery_price: float | Literal['Не рассчитано'] | None
 	created_at: datetime
+
+
+class CompanyCreateSchema(BaseModel):
+	name: str
+
+
+class CompanyResponse(CompanyCreateSchema):
+	id: int
+	name: str
+
+
+class BindCompanySchema(BaseModel):
+	parcel_id: int = Field(..., ge=1, description='ID посылки')
+	company_id: int = Field(..., ge=1, description='ID компании')
+
+
+class BindCompanyResponseSchema(BaseModel):
+	message: str = 'Компания успешно привязана к посылке'

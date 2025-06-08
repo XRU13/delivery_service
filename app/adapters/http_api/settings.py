@@ -12,7 +12,9 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from app.adapters import database
-from app.adapters.database.repositories import ParcelRepo
+from app.adapters.database.repositories.parcel_repo import ParcelRepo
+from app.adapters.database.repositories.company_repo import CompanyRepo
+from app.applications.services.company_service import CompanyService
 from app.applications.services.parcel_services import ParcelService
 from app.utils.constants import CookiesConstants
 from app.utils.settings import RateSettings
@@ -77,6 +79,18 @@ async def create_parcel_repo(
 	return ParcelRepo(session=session)
 
 
+async def create_company_repo(
+	session: AsyncSession = Depends(get_db_session)
+) -> CompanyRepo:
+	return CompanyRepo(session=session)
+
+
+def create_company_service(
+	company_repo: CompanyRepo = Depends(create_company_repo),
+) -> CompanyService:
+	return CompanyService(company_repo=company_repo)
+
+
 def create_parcel_service(
 	parcel_repo: ParcelRepo = Depends(create_parcel_repo),
 ) -> ParcelService:
@@ -99,3 +113,5 @@ async def get_or_create_session_id(
 			max_age=CookiesConstants.MAX_AGE.value,
 		)
 	return session_id
+
+

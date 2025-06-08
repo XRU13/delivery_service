@@ -5,6 +5,7 @@ from fastapi import FastAPI
 
 from app.adapters.http_api.controllers.parcels_router import parcel_router
 from app.adapters.http_api.controllers.tasks_router import tasks_router
+from app.adapters.http_api.controllers.company_router import company_router
 
 app = FastAPI(
     title='International Delivery Service',
@@ -15,6 +16,7 @@ app = FastAPI(
 
 app.include_router(parcel_router, prefix='/parcels', tags=['parcels'])
 app.include_router(tasks_router, prefix='/tasks', tags=['tasks'])
+app.include_router(company_router, prefix='/company', tags=['company'])
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,6 +25,7 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
 
 @app.get('/')
 async def root():

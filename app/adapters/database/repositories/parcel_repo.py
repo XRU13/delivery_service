@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 
 from app.applications.dataclasses.dataclasses import Parcel, ParcelType
@@ -123,3 +123,19 @@ class ParcelRepo(IParcelRepositories):
         )
         result = await self.session.execute(stmt)
         return result.scalars().all()
+
+    async def bind_company_to_parcel(
+        self,
+        parcel_id: int,
+        company_id: int,
+    ) -> bool:
+        query = (
+            update(Parcel)
+            .where(
+                Parcel.id == parcel_id,
+                Parcel.company_id.is_(None),
+            )
+            .values(company_id=company_id)
+        )
+        result = await self.session.execute(query)
+        return result.rowcount > 0

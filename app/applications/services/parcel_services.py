@@ -1,9 +1,12 @@
 from dataclasses import dataclass
 
+from fastapi import HTTPException
+from starlette import status
+
 from app.adapters.http_api.schemas.schemas import (
 	ParcelTypeResponse,
 	ParcelListResponse,
-	ParcelDetailResponse,
+	ParcelDetailResponse, BindCompanyResponseSchema,
 )
 from app.applications.interfaces.interfaces import IParcelRepositories
 from app.applications.services.errors.errors import NotFoundError
@@ -85,7 +88,7 @@ class ParcelService:
 					delivery_price=(
 						parcel.delivery_price
 						if parcel.delivery_price is not None
-						else ParcelsConstants.NOT_MEANT
+						else ParcelsConstants.NOT_MEANT.value
 					),
 					created_at=parcel.created_at,
 				)
@@ -118,7 +121,26 @@ class ParcelService:
 			delivery_price=(
 				parcel.delivery_price
 				if parcel.delivery_price is not None
-				else ParcelsConstants.NOT_MEANT
+				else ParcelsConstants.NOT_MEANT.value
 			),
 			created_at=parcel.created_at,
 		)
+
+	async def bind_company_to_parcel(
+		self,
+		parcel_id: int,
+		company_id: int,
+	) -> BindCompanyResponseSchema:
+		"""
+        Привязывает посылку к транспортной компании, если она ещё не привязана.
+        """
+		parcel = await self.parcel_repo.bind_company_to_parcel(
+				parcel_id=parcel_id,
+				company_id=company_id,
+			)
+		if not parcel:
+			raise HTTPException(
+				status_code=status.HTTP_409_CONFLICT,
+				detail='Посылка уже привязана к компании',
+			)
+		return BindCompanyResponseSchema()

@@ -2,7 +2,7 @@ import asyncio
 import logging
 
 from app.tasks.celery_app import celery_app
-from app.adapters.database.repositories import ParcelRepo
+from app.adapters.database.repositories.parcel_repo import ParcelRepo
 from app.applications.services.price_update_service import PriceUpdateService
 from app.tasks.settings import get_celery_redis, get_celery_db_session
 from app.utils.rate import RateService

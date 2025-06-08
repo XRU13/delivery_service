@@ -24,3 +24,5 @@ redis==5.0.1
 asyncmy>=0.2.10
 aiomysql>=0.0.21
 celery-aio-pool==0.1.0rc8
+pytest-asyncio>=0.21.0
+greenlet>=2.0

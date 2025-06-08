@@ -40,7 +40,7 @@ def upgrade():
 
     op.bulk_insert(
         sa.table('parcel_types',
-            sa.column('name', sa.String)
+            sa.column('name', sa.String(50))
         ),
         [
             {'name': 'одежда'},

@@ -13,9 +13,16 @@ class Parcel:
 	updated_at: datetime
 	delivery_price: float | None = None
 	id: int | None = None
+	company_id: int | None = None
 
 
 @dataclass
 class ParcelType:
+	name: str
+	id: int | None = None
+
+
+@dataclass
+class Company:
 	name: str
 	id: int | None = None
