@@ -1,5 +1,5 @@
 import pytest
-from app.adapters.database.repositories import ParcelRepo
+from app.adapters.database.repositories.parcel_repo import ParcelRepo
 
 
 @pytest.mark.asyncio

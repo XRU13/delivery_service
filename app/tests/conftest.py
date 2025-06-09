@@ -1,11 +1,29 @@
+import asyncio
 import pytest
+import pytest_asyncio
 from unittest.mock import AsyncMock, MagicMock
 from datetime import datetime
+from httpx import AsyncClient, ASGITransport
 
-from app.adapters.database.repositories import ParcelRepo
-from app.applications.dataclasses.parcel_dataclasses import Parcel, ParcelType
+from app.composites.http_api import app
+from app.adapters.database.repositories.parcel_repo import ParcelRepo
+from app.applications.dataclasses.dataclasses import Parcel, ParcelType
 
+# Один event loop на всё тестирование
+@pytest.fixture(scope='session')
+def event_loop():
+    loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
 
+# HTTP-клиент
+@pytest_asyncio.fixture
+async def test_client() -> AsyncClient:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url='http://test') as client:
+        yield client
+
+# Моки
 @pytest.fixture
 def mock_session_execute():
     session = AsyncMock()
@@ -20,10 +38,9 @@ def mock_session_execute():
 
     return session, _set_execute_result
 
-
+# Тестовые данные
 @pytest.fixture
 def parcel_instance():
-    """Готовый экземпляр Parcel с id."""
     return Parcel(
         id=1,
         session_id='abc',
@@ -35,14 +52,12 @@ def parcel_instance():
         updated_at=datetime.now()
     )
 
-
 @pytest.fixture
 def parcel_type_instance():
     return ParcelType(
         id=1,
         name='Одежда'
     )
-
 
 @pytest.fixture
 def mock_repo_with_create_parcel(mock_session_execute):
