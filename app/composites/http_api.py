@@ -1,9 +1,11 @@
 import logging
+
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 
 from fastapi.middleware.cors import CORSMiddleware
 
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 
 from app.adapters.http_api.controllers.parcels_router import parcel_router
 from app.adapters.http_api.controllers.tasks_router import tasks_router
@@ -44,6 +46,21 @@ app.add_middleware(
 )
 
 
-@app.get('/')
+@app.get(
+	'/',
+	summary='Корневой endpoint API',
+	description='Служебный endpoint для проверки доступности и состояния сервиса доставки.',
+	response_description='Расширенная информация о состоянии API',
+	status_code=200,
+	tags=['service']
+)
 async def root():
-	return {'message': 'Добро пожаловать в API сервиса доставки'}
+	"""
+	Возвращает информацию о состоянии сервиса, версии API и времени сервера.
+	"""
+	return {
+		'status': status.HTTP_200_OK,
+		'version': app.version,
+		'server_time_utc': datetime.now(timezone.utc).isoformat(),
+		'environment': 'production'
+	}
